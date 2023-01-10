@@ -1,0 +1,700 @@
+---
+title: "REST APIs"
+author: "Pierre Formont"
+format: 
+  revealjs:
+    highlight-style: a11y
+    code-block-background: true
+    code-block-border-left: true
+    code-line-numbers: true
+    incremental: true
+    smaller: true
+---
+
+## Agenda
+
+- What are REST APIs
+- Main methods to interact with APIs
+- How to use in Python
+- Exercises
+
+## API
+
+- API = **`A`**`pplication` **`P`**`rogramming ` **`I`**`nterface`
+- set of definitions and protocols to build and integrate software
+- contract between a provider and a user
+- provider declares how its service can be used
+- **interacting with any language / library / web service <=> using an API**
+
+## API examples
+
+**Unix**
+
+```{.bash}
+cd ~
+ls -lah .
+cat .zshrc
+```
+
+. . .
+
+**Base Python**
+
+```{python}
+#| echo: true
+import csv
+with open("resources/csv/users.csv", "r") as f:
+    reader = csv.reader(f)
+```
+
+. . .
+
+**Python library**
+
+```{.python}
+import pandas
+data = pandas.read_csv(file_path)
+```
+
+. . .
+
+All these code samples is based on the API the language or library is declaring.
+
+## RESTful APIs
+
+APIs that conform to the REST (**`RE`**`presentational` **`S`**`tate ` **`T`**`ransfer`) architecture style.
+
+- **not a protocol or a standard** but a set of 6 architectural constraints
+- designed for network architectures, especially client-server applications
+- more lightweight than other alternatives, _i.e._ `SOAP`
+- widely used in the industry, especially in microservices architecture where components are independent from each other but still need to interact often
+
+## REST constraints
+
+1. **Client–server architecture**: the client does not need to know the internals of the server
+2. **Cacheability**: whenever possible, responses should be cached to improve response time
+3. **Statelessness**: each request is separate, unrelated from previous ones
+4. **Layered system**: the client does not need to know if it's connected to the server directly or through intermediaries 
+5. **Code-on-demand**: the server can send executable code to the client if needed
+
+## REST constraints: uniform interface
+
+- requested resources are identifiable and **separate from the representations** sent to the client (_e.g._ `JSON` data returned from a database query)
+- resource representations contain enough information to manipulate resources
+- messages returned to the client are self-descriptive
+- [Hypermedia as the engine of application state](https://en.wikipedia.org/wiki/HATEOAS): after accessing a resource, the client should be able to use hyperlinks to find all other currently available actions they can take.
+
+## REST standards
+
+As mentioned, REST is an architecture, not a standard.
+
+. . .
+
+However, standards are good for interoperability, reproducibility, ease-of-use, friction reduction, etc.
+
+. . .
+
+A set of base practices has been widely adopted for RESTful APIs:
+
+- building atop HTTP methods (also called verbs): `GET`, `POST`, `DELETE`, etc.
+- identify resources with nouns, _e.g._ if a resouce is dealing with animals, it should be called `animals`:
+    - `GET /api/animals`: retrieve a list of animals
+    - `POST /api/animals`: add a new animal
+- use a consistent structured data format for responses: `json` or `xml`
+
+. . .
+
+A industry-wide effort to provide a standard has been started several years ago: the [OpenAPI specification](https://spec.openapis.org/oas/latest.html).
+
+## How to use REST APIs
+
+4 components needed:
+
+- _endpoint_: the URL of a resource on a server, _e.g._ `https://api.github.com/users/<username>`
+- _method_: the HTTP method/verb to query this resource with, _e.g._ `GET`, `POST`, `PUT`, `DELETE` for the 4 most common methods
+- _body_ / _payload_: actual data passed to/from the server when getting data or performing an action, _e.g._ when creating a new resource, the body contains the necessary information to create the resource
+- _headers_: additional information passed between the client and the server, _e.g._ authentication tokens
+
+. . .
+
+**Note:** not all endpoints support all methods, some are only to retrieve data, some only to add or update data, some can do all operations
+
+## REST operations: GET
+
+- used to **retrieve** a resource
+- the method used in a browser to display a webpage
+- the URL can have parameters or not:
+    - `https://api.github.com/user` has no parameters
+    - `https://api.github.com/users/<username>` has a `username` parameter
+
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash code-line-numbers="1"}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+`curl`: command line tool to send HTTP requests
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash code-line-numbers="2"}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+Header that indicates that the client understands json
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash code-line-numbers="3"}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+Header containing the authentication token to the Github API
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash code-line-numbers="4"}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+Proprietary header (`X-`) that indicates the version of the Github API to use
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash code-line-numbers="5"}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+Endpoint to request
+
+## REST operations: GET examples (1/2)
+
+Github API: list users
+
+``` {.bash}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users
+```
+
+. . .
+
+returns 
+
+```{json
+[
+  {
+    "login": "octocat",
+    "id": 1,
+    "node_id": "MDQ6VXNlcjE=",
+    "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/octocat",
+    "html_url": "https://github.com/octocat",
+    "followers_url": "https://api.github.com/users/octocat/followers",
+    "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+    "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+    "organizations_url": "https://api.github.com/users/octocat/orgs",
+    "repos_url": "https://api.github.com/users/octocat/repos",
+    "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/octocat/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+]
+```
+
+## REST operations: GET examples (2/2)
+
+Github API: retrieve a specific user
+
+``` {,bash}
+curl \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users/USERNAME
+```
+
+. . .
+
+returns 
+
+```{json
+{
+  "login": "octocat",
+  "id": 1,
+  "node_id": "MDQ6VXNlcjE=",
+  "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/octocat",
+  "html_url": "https://github.com/octocat",
+  "followers_url": "https://api.github.com/users/octocat/followers",
+  "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+  "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+  "organizations_url": "https://api.github.com/users/octocat/orgs",
+  "repos_url": "https://api.github.com/users/octocat/repos",
+  "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/octocat/received_events",
+  "type": "User",
+  "site_admin": false,
+  "name": "monalisa octocat",
+  "company": "GitHub",
+  "blog": "https://github.com/blog",
+  "location": "San Francisco",
+  "email": "octocat@github.com",
+  "hireable": false,
+  "bio": "There once was...",
+  "twitter_username": "monatheoctocat",
+  "public_repos": 2,
+  "public_gists": 1,
+  "followers": 20,
+  "following": 0,
+  "created_at": "2008-01-14T04:33:35Z",
+  "updated_at": "2008-01-14T04:33:35Z"
+}
+```
+
+## REST operations: POST
+
+- used to **add** a resource
+- the URL can have parameters or not
+- the necessary data should be put in the request _body_
+
+## REST operations: POST example
+
+Github API: create a repository for the authenticated user
+
+```{.bash}
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/user/repos \
+  -d '{"name":"Hello-World","description":"This is your first repo!","homepage":"https://github.com","private":false,"is_template":true}'
+```
+
+## REST operations: POST example
+
+Github API: create a repository for the authenticated user
+
+```{.bash code-line-numbers="2"}
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/user/repos \
+  -d '{"name":"Hello-World","description":"This is your first repo!","homepage":"https://github.com","private":false,"is_template":true}'
+```
+
+HTTP method to use -- here `POST`. 
+
+Not specified in the previous examples as `GET` is the default method.
+
+## REST operations: POST example
+
+Github API: create a repository for the authenticated user
+
+```{.bash code-line-numbers="7"}
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/user/repos \
+  -d '{"name":"Hello-World","description":"This is your first repo!","homepage":"https://github.com","private":false,"is_template":true}'
+```
+
+Body of the request
+
+## REST operations: POST example
+
+Github API: create a repository for the authenticated user
+
+```{.bash}
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/user/repos \
+  -d '{"name":"Hello-World","description":"This is your first repo!","homepage":"https://github.com","private":false,"is_template":true}'
+```
+
+. . .
+
+returns
+
+```{json}
+{
+  "id": 1296269,
+  "node_id": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+  "name": "Hello-World",
+  "full_name": "octocat/Hello-World",
+  "owner": {
+    "login": "octocat",
+    "id": 1,
+    "node_id": "MDQ6VXNlcjE=",
+    "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/octocat",
+    "html_url": "https://github.com/octocat",
+    "followers_url": "https://api.github.com/users/octocat/followers",
+    "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+    "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+    "organizations_url": "https://api.github.com/users/octocat/orgs",
+    "repos_url": "https://api.github.com/users/octocat/repos",
+    "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/octocat/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "private": false,
+  "html_url": "https://github.com/octocat/Hello-World",
+  "description": "This your first repo!",
+  "fork": false,
+  "url": "https://api.github.com/repos/octocat/Hello-World",
+  "archive_url": "https://api.github.com/repos/octocat/Hello-World/{archive_format}{/ref}",
+  "assignees_url": "https://api.github.com/repos/octocat/Hello-World/assignees{/user}",
+  "blobs_url": "https://api.github.com/repos/octocat/Hello-World/git/blobs{/sha}",
+  "branches_url": "https://api.github.com/repos/octocat/Hello-World/branches{/branch}",
+  "collaborators_url": "https://api.github.com/repos/octocat/Hello-World/collaborators{/collaborator}",
+  "comments_url": "https://api.github.com/repos/octocat/Hello-World/comments{/number}",
+  "commits_url": "https://api.github.com/repos/octocat/Hello-World/commits{/sha}",
+  "compare_url": "https://api.github.com/repos/octocat/Hello-World/compare/{base}...{head}",
+  "contents_url": "https://api.github.com/repos/octocat/Hello-World/contents/{+path}",
+  "contributors_url": "https://api.github.com/repos/octocat/Hello-World/contributors",
+  "deployments_url": "https://api.github.com/repos/octocat/Hello-World/deployments",
+  "downloads_url": "https://api.github.com/repos/octocat/Hello-World/downloads",
+  "events_url": "https://api.github.com/repos/octocat/Hello-World/events",
+  "forks_url": "https://api.github.com/repos/octocat/Hello-World/forks",
+  "git_commits_url": "https://api.github.com/repos/octocat/Hello-World/git/commits{/sha}",
+  "git_refs_url": "https://api.github.com/repos/octocat/Hello-World/git/refs{/sha}",
+  "git_tags_url": "https://api.github.com/repos/octocat/Hello-World/git/tags{/sha}",
+  "git_url": "git:github.com/octocat/Hello-World.git",
+  "issue_comment_url": "https://api.github.com/repos/octocat/Hello-World/issues/comments{/number}",
+  "issue_events_url": "https://api.github.com/repos/octocat/Hello-World/issues/events{/number}",
+  "issues_url": "https://api.github.com/repos/octocat/Hello-World/issues{/number}",
+  "keys_url": "https://api.github.com/repos/octocat/Hello-World/keys{/key_id}",
+  "labels_url": "https://api.github.com/repos/octocat/Hello-World/labels{/name}",
+  "languages_url": "https://api.github.com/repos/octocat/Hello-World/languages",
+  "merges_url": "https://api.github.com/repos/octocat/Hello-World/merges",
+  "milestones_url": "https://api.github.com/repos/octocat/Hello-World/milestones{/number}",
+  "notifications_url": "https://api.github.com/repos/octocat/Hello-World/notifications{?since,all,participating}",
+  "pulls_url": "https://api.github.com/repos/octocat/Hello-World/pulls{/number}",
+  "releases_url": "https://api.github.com/repos/octocat/Hello-World/releases{/id}",
+  "ssh_url": "git@github.com:octocat/Hello-World.git",
+  "stargazers_url": "https://api.github.com/repos/octocat/Hello-World/stargazers",
+  "statuses_url": "https://api.github.com/repos/octocat/Hello-World/statuses/{sha}",
+  "subscribers_url": "https://api.github.com/repos/octocat/Hello-World/subscribers",
+  "subscription_url": "https://api.github.com/repos/octocat/Hello-World/subscription",
+  "tags_url": "https://api.github.com/repos/octocat/Hello-World/tags",
+  "teams_url": "https://api.github.com/repos/octocat/Hello-World/teams",
+  "trees_url": "https://api.github.com/repos/octocat/Hello-World/git/trees{/sha}",
+  "clone_url": "https://github.com/octocat/Hello-World.git",
+  "mirror_url": "git:git.example.com/octocat/Hello-World",
+  "hooks_url": "https://api.github.com/repos/octocat/Hello-World/hooks",
+  "svn_url": "https://svn.github.com/octocat/Hello-World",
+  "homepage": "https://github.com",
+  "organization": null,
+  "language": null,
+  "forks": 9,
+  "forks_count": 9,
+  "stargazers_count": 80,
+  "watchers_count": 80,
+  "watchers": 80,
+  "size": 108,
+  "default_branch": "master",
+  "open_issues": 0,
+  "open_issues_count": 0,
+  "is_template": true,
+  "license": {
+    "key": "mit",
+    "name": "MIT License",
+    "url": "https://api.github.com/licenses/mit",
+    "spdx_id": "MIT",
+    "node_id": "MDc6TGljZW5zZW1pdA==",
+    "html_url": "https://api.github.com/licenses/mit"
+  },
+  "topics": [
+    "octocat",
+    "atom",
+    "electron",
+    "api"
+  ],
+  "has_issues": true,
+  "has_projects": true,
+  "has_wiki": true,
+  "has_pages": false,
+  "has_downloads": true,
+  "archived": false,
+  "disabled": false,
+  "visibility": "public",
+  "pushed_at": "2011-01-26T19:06:43Z",
+  "created_at": "2011-01-26T19:01:12Z",
+  "updated_at": "2011-01-26T19:14:43Z",
+  "permissions": {
+    "admin": false,
+    "push": false,
+    "pull": true
+  },
+  "allow_rebase_merge": true,
+  "template_repository": null,
+  "temp_clone_token": "ABTLWHOULUVAXGTRYU7OC2876QJ2O",
+  "allow_squash_merge": true,
+  "allow_auto_merge": false,
+  "delete_branch_on_merge": true,
+  "allow_merge_commit": true,
+  "subscribers_count": 42,
+  "network_count": 0
+}
+```
+
+## REST operations: PUT
+
+- used to **update** a resource
+- the URL can have parameters or not
+- the necessary data should be put in the request _body_
+
+## REST operations: PUT example
+
+Github API: add an organization project to a team
+
+```{.bash}
+curl \
+  -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/orgs/ORG/teams/TEAM_SLUG/projects/PROJECT_ID \
+  -d '{"permission":"write"}'
+```
+
+## REST operations: DELETE
+
+- used to **delete** a resource
+- the URL can have parameters or not
+
+## REST operations: DELETE example
+
+Github API: delete a team
+
+```{.bash}
+curl \
+  -X DELETE \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer <YOUR-TOKEN>"\
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/orgs/ORG/teams/TEAM_SLUG
+```
+
+## Status codes
+
+- code with 3 numbers returned by the API after each request
+- indicates if an operation has succeeded or not
+- 5 main families:
+    - 100-199: information
+    - 200-299: successful response, _e.g._ `200 OK`, `201 Created`
+    - 300-399: redireciton, _e.g._ `301 Moved Permanently`
+    - 400-499: client error, _e.g._ `401 Unauthorized`, `404 Not Found`
+    - 500-599: server error, _e.g._ `500 Internal Server Error`
+
+## Recap
+
+- architecture style for network client-server applications
+- allow resource manipulation without knowledge of server internals
+- need an endpoint and optional headers and body to communicate
+- 4 main methods: `GET`, `POST`, `PUT`, `DELETE`
+- status code in the response to indicate the result of the operation
+
+## REST APIs in Python
+
+Python provides an HTTP client through the [urllib.request](https://docs.python.org/3.10/library/urllib.request.html) module.
+
+. . .
+
+However, the recommended way -- even by the Python maintainers -- is through the [requests](https://requests.readthedocs.io/en/latest/) package.
+
+. . .
+
+```{.bash}
+# make sure the virtual environment is activated
+pip install requests
+```
+
+. . .
+
+We can start testing the [Github API](https://docs.github.com/en/rest/activity/events?apiVersion=2022-11-28) using `requests`:
+
+```{python}
+#| echo: true
+import requests
+r = requests.get('https://api.github.com/events')
+r
+```
+
+. . .
+
+We can print the full response
+```{python}
+r.json()
+```
+
+## REST APIs in Python - parameters
+
+Parameters are passed as Python dictionaries to the `params` argument:
+
+. . .
+
+
+```{python}
+#| echo: true
+params = {'per_page': 5}
+r = requests.get('https://api.github.com/events', params=params)
+r.json()
+```
+
+. . .
+
+Check that there are only 5 results:
+```{python}
+#| echo: true
+
+len(r.json())
+```
+
+## REST APIs in Python - headers
+
+Headers are also passed as Python dictionaries -- to the `headers` argument:
+
+. . .
+
+
+```{python}
+#| echo: true
+headers = {'accept': 'application/vnd.github+json'}
+r = requests.get('https://api.github.com/events', headers=headers)
+r.json()
+```
+
+## REST APIs in Python - body
+
+Body is also passed as a Python dictionary -- to the `data` argument:
+
+. . .
+
+
+```{python}
+#| echo: true
+data = {'param1': 'value1'}
+r = requests.post('https://api.github.com/events', data=data)
+```
+
+. . .
+
+**Note**: this sends the data as [form-encoded](). Some APIs (including Github's) accepts json-encoded payloads. In that case, use the `json` parameter:
+
+```{python}
+#| echo: true
+data = {'param1': 'value1'}
+r = requests.post('https://api.github.com/events', json=data)
+```
+
+## REST APIs in Python - basic exercises
+
+**Exercise 8**
+
+>  Send a GET request to `https://httpbin.org/get` with an _'accept: application/json'_ header. What is the response status code ?
+
+. . .
+
+**Exercise 9**
+
+>  Send a POST request to `https://httpbin.org/get`. What is the response status code and why ?
+
+. . .
+
+**Exercise 10**
+
+>  Send a POST request to `https://httpbin.org/post` using the `data` parameter. Send one using the `json` parameter. Note the differences.
+
+## OpenSky API
+
+[OpenSky](https://opensky-network.org/) is a non-profit aviation research network.
+
+They provide a free [REST API](https://openskynetwork.github.io/opensky-api/rest.html) with information about flights.
+
+**Exercise 11**
+
+> Get all flights leaving the Paris Charles-de-Gaulle airport on 2022-12-01.
+
+- Which endpoint do you need to use ?
+- What are the parameters for this endpoint?
+- In what format do you need to input them ?
+
+> Find the airport with the most flights out of Paris Charles-de-Gaulle.
+
+## Github API - authentication
+
+Most of the endpoints for the Github API require authentication. 
+
+You need to create a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-fine-grained-personal-access-token) from your [Github settings](https://github.com/settings/tokens?type=beta) and send it in the header of the request.
+
+**Exercise 12**
+
+> List all your repositories using the Github API
+
+Check the [documentation](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repositories-for-the-authenticated-user) for how to format the headers.
