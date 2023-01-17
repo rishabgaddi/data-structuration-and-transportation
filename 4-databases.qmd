@@ -1,0 +1,437 @@
+---
+title: "Databases"
+author: "Pierre Formont"
+format: 
+  revealjs:
+    highlight-style: a11y
+    code-block-background: true
+    code-block-border-left: true
+    code-line-numbers: true
+    incremental: true
+    smaller: true
+---
+
+## Agenda
+
+- Databases, a very short introduction
+- SQL with sqlite
+- How to use in Python
+- Exercises
+
+## Databases
+
+- system used to store data in an organized way
+- access to the data is provided by a Database Management System (DBMS) but both terms are usually conflated
+- generally, data is stored into _tables_, collection of records sharing a similar structure
+- _tables_ can also be organized into _schemas_ that represent business or technical domains, _e.g._:
+  - a `transactions` _table_ can be placed in the `finance` _schema_
+  - a `campaigns` _table_ can be placed in the `marketing` _schema_ 
+
+## SQL
+
+- SQL = **`S`**`tructured` **`Q`**`uery ` **`L`**`anguage`
+- created in 1974
+- _de facto_ language to interact with databases
+- there is a standard -- `ANSI SQL` -- but many databases and systems don't implement the full standard and/or add their own changes, _e.g._:
+    - TSQL for Microsoft
+    - PLSQL for Oracle
+
+
+## SQL - data types
+
+- most databases use static typing
+- types can differ from one database engine to another
+- generally, most databases support data types for:
+  - numbers, either integer or floats
+  - strings,
+  - booleans,
+  - the special `NULL` value, meaning no data
+  - dates and datetimes
+  - etc.
+- some databases offer specialized types, _e.g._:
+  - geography types to represent points, lines or polygons on a map
+  - json data
+  - blob to store large binary objects
+
+
+## Base SQL commands - CREATE
+
+Create objects in a database -- here, we will only create **tables**
+
+. . .
+
+```{sql}
+CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+   ...
+);
+```
+
+. . .
+
+For example:
+
+```{sql}
+CREATE TABLE users (
+    user_id int,
+    user_name varchar(255),
+    user_city varchar(255),
+    user_school varchar(255)
+);
+```
+
+## Base SQL commands - SELECT
+
+Retrieve data from a database
+
+. . .
+
+```{sql}
+SELECT 
+    column1,
+    column2,
+   ...
+FROM <table_name>
+```
+
+. . .
+
+For example:
+
+```{sql}
+SELECT
+    user_id,
+    user_name
+FROM <table_name>
+```
+
+. . .
+
+To select all columns
+
+```{sql}
+SELECT *
+FROM <table_name>
+```
+
+## Base SQL commands - SELECT WHERE
+
+Can put a condition on what data to retrieve
+
+. . .
+
+```{sql}
+SELECT 
+    column1,
+    column2,
+   ...
+FROM <table_name>
+WHERE <condition>
+```
+
+. . .
+
+For example:
+
+```{sql}
+SELECT
+    user_id,
+    user_name
+FROM <table_name>
+WHERE user_city = 'Paris'
+```
+
+
+## Base SQL commands - INSERT
+
+Create rows in a table
+
+. . .
+
+```{sql}
+INSERT INTO <table_name> (column1, column2, column3, ...)
+VALUES (value1, value2, value3, ...);
+
+-- don't need the column list when inserting for all columns
+INSERT INTO <table_name>
+VALUES (value1, value2, value3, ...);
+```
+
+. . .
+
+For example:
+
+```{sql}
+INSERT INTO users (user_id, user_name, user_city, user_school) -- column list optional but good practice
+VALUES (1, 'Pierre', 'Paris', 'EPITA');
+```
+
+. . .
+
+Can insert multiple rows at the same time:
+
+```{sql}
+INSERT INTO users
+VALUES (1, 'Pierre', 'Paris', 'EPITA'), (2, 'Ada', 'London', 'Home'), ...;
+```
+
+
+## Base SQL commands - UPDATE
+
+Update rows in a table
+
+. . .
+
+```{sql}
+UPDATE <table_name> 
+SET column1 = value1, column2 = value2, ...
+```
+
+. . .
+
+Can add a condition on which rows to update
+
+```{sql}
+UPDATE <table_name> 
+SET column1 = value1, column2 = value2, ...
+WHERE <condition>
+```
+
+. . .
+
+For example:
+
+```{sql}
+UPDATE users 
+SET user_school = 'EPITA'
+WHERE user_city != 'London'
+```
+
+## Base SQL commands - DELETE
+
+Remove rows from a table
+
+. . .
+
+```{sql}
+DELETE FROM <table_name> 
+WHERE <condition>
+```
+
+. . .
+
+For example:
+
+```{sql}
+DELETE FROM users 
+WHERE user_city != 'London'
+```
+
+## sqlite
+
+- open-source lightweight database engine, written in C
+- very thoroughly tested
+- started in 2000, now the most widely used database in the world (notably on Android)
+- very easy to get started:
+  - no separate server process
+  - a `sqlite` database are stored in a single file
+  - is natively supported by PHP and Python
+
+## sqlite in Python
+
+From the [official Python documentation](https://docs.python.org/3/library/sqlite3.html):
+
+```{python}
+import os
+os.remove("test.db")
+```
+
+```{python}
+#| echo: true
+import sqlite3
+connection = sqlite3.connect("test.db")
+cursor = connection.cursor()
+```
+
+With the `cursor`, we can now execute queries by writing plain SQL:
+
+```{python}
+#| echo: true
+cursor.execute("CREATE TABLE IF NOT EXISTS movies(title, year, score)")
+res = cursor.execute("SELECT name FROM sqlite_schema")
+res.fetchone()
+```
+
+## Inserting data
+
+```{python}
+#| echo: true
+cursor.execute("""
+    INSERT INTO movies VALUES
+        ('Monty Python and the Holy Grail', 1975, 8.2),
+        ('And Now for Something Completely Different', 1971, 7.5)
+""")
+connection.commit()
+res = cursor.execute("SELECT * FROM movies")
+res.fetchone()
+```
+
+Use `connection.commit()` to close the transaction implicitly opened by the `INSERT` statement.
+
+## Binding data
+
+```{python}
+#| echo: true
+data = [
+    ("Monty Python Live at the Hollywood Bowl", 1982, 7.9),
+    ("Monty Python's The Meaning of Life", 1983, 7.5),
+    ("Monty Python's Life of Brian", 1979, 8.0),
+]
+cursor.executemany("INSERT INTO movies VALUES(?, ?, ?)", data)
+connection.commit()
+```
+
+`?` is used to bind the data from Python to the SQL query. 
+
+Notice there are three `?` characters, one for each column of the `movies` table -- and not one for each element of the `data` list.
+
+. . .
+
+```{python}
+#| echo: true
+for row in cursor.execute("SELECT year, title FROM movies ORDER BY year"):
+    print(row)
+```
+
+. . .
+
+**Exercise 13**
+
+> Go back to exercise6 (parsing json into a Python class) and now, create a `sqlite` database, create a `users` table and insert this data
+
+## Adapters
+
+It is possible to convert Python types to `sqlite` types seamlessly by declaring an adapter.
+
+. . .
+
+Here is an adapter to tell `sqlite` how to handle the Python `Point` type.
+
+```{python}
+#| echo: true
+class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+def adapt_point(point):
+    return f"{point.x};{point.y}"
+
+sqlite3.register_adapter(Point, adapt_point)
+```
+
+. . .
+
+It is now possible to do:
+
+```{python}
+#| echo: true
+con = sqlite3.connect(":memory:")
+cur = con.cursor()
+
+cur.execute("CREATE TABLE points (p)")
+cur.execute("INSERT INTO points VALUES (?)", (Point(1.0, 2.5),))
+con.commit()
+cur.execute("SELECT * FROM points")
+print(cur.fetchone()[0])
+```
+
+## Notes on adapters
+
+- it is not possible to create a binding on multiple columns, the adapter should return a single string value to be placed in a single column in `sqlite`
+
+. . .
+
+```{.python}
+# Incorrect
+def adapt_point(point):
+    return (point.x, point.y)
+
+sqlite3.register_adapter(Point, adapt_point)
+cur.execute("INSERT INTO points VALUES (?, ?)", (Point(1.0, 2.5),))
+
+# Correct
+def adapt_point(point):
+    return f"{point.x};{point.y}"
+
+sqlite3.register_adapter(Point, adapt_point)
+cur.execute("INSERT INTO points VALUES (?)", (Point(1.0, 2.5),))
+```
+
+- the `parameters` to an `execute` call **must be a sequence**, _i.e._ a `list` or a `tuple`, even if there is only one parameter
+
+. . .
+
+
+```{.python}
+# Incorrect
+cur.execute("INSERT INTO points VALUES (?)", Point(1.0, 2.5))
+
+# Correct
+cur.execute("INSERT INTO points VALUES (?)", (Point(1.0, 2.5),))
+```
+
+## Converters
+
+It is possible to convert `sqlite` types to Python types by declaring a converter.
+
+. . .
+
+Here is a converter to tell `Python` how to handle the `sqlite` `Point` type.
+
+```{python}
+#| echo: true
+def convert_point(s):
+    x, y = map(float, s.split(b";"))
+    return Point(x, y)
+
+sqlite3.register_converter("point", convert_point)
+con = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
+```
+
+- converter functions always get a `bytes` object, hence the `b` in `s.split(b";")`
+- the `detect_types` parameter must be set when creating the connection to the database
+
+. . .
+
+It is now possible to do:
+
+```{python}
+#| echo: true
+p = Point (4.0, 2.5)
+cur = con.cursor()
+cur.execute("CREATE TABLE points (p point)")
+cur.execute("INSERT INTO points VALUES (?)", (Point(1.0, 2.5),))
+con.commit()
+cur.execute("SELECT * FROM points")
+print(vars(cur.fetchone()[0]))
+```
+
+## sqlite exercises
+
+**Exercise 14**
+
+> Implement the converter and adapter to insert and retrieve User objects in the users table
+
+Hints:
+
+- to convert bytes to a string, use the `.decode("utf8")` method, _e.g._
+
+. . .
+
+```{python}
+#| echo: true
+to_decode = b"hi"
+to_decode.decode("utf8")
+```
