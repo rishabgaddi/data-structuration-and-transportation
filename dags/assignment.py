@@ -17,8 +17,8 @@ def assignment():
   def to_seconds_since_epoch(input_date: str) -> int:
     return int(mktime(date.fromisoformat(input_date).timetuple()))
 
-  @task(multiple_outputs=True)
-  def read_data() -> dict:
+  @task
+  def read_data():
     params = {
         "airport": "LFPG", # ICAO code for CDG
         "begin": to_seconds_since_epoch("2022-12-01"),
@@ -28,13 +28,14 @@ def assignment():
     response = requests.get(cdg_flights, params=params)
     flights = json.dumps(response.json())
     print(flights)
-    return {"flights": flights}
+    return flights
 
   @task
-  def write_data(flights: dict) -> None:
+  def write_data(flights: str) -> None:
     # write the flights into a json file
+    data = json.loads(flights)
     with open("./dags/flights.json", "w") as f:
-      json.dump(flights, f)
+      json.dump(data, f)
 
   flights = read_data()
   write_data(flights)
