@@ -66,3 +66,16 @@ source venv/bin/activate
 python -m venv venv # might need to use python3 here
 .\venv\Scripts\activate
 ```
+
+## Airflow
+
+- follow [these steps](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html) to install Airflow using Docker Compose
+- make sure you are in the root folder of the data-structuration-and-transportation repository
+- **make sure you have more than 4Gb of memory allocated to Docker**
+- the important steps are:
+    - Before you begin
+    - Fetching docker-compose.yaml (if `curl` is not working, simply download the file)
+    - Initializing Environment
+    - Running Airflow
+- if you can access the UI at `http://localhost:8080`, you're good to go
+- if there is an issue, you may need to remove the `dags`, `logs` and `plugins` folders that are created automatically by Docker Compose and create them manually with `mkdir`
