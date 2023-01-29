@@ -1,9 +1,8 @@
-# name: Rishab Gaddi, John Kuloth Peterson Stephen Arumugam
+# names: Rishab Gaddi and John Kuloth Peterson Stephen Arumugam
 from airflow.decorators import dag, task
-from datetime import datetime, date
-from time import mktime
-import requests
+from datetime import datetime
 import json
+from utils import read_from_api, json_dump_to_file, to_seconds_since_epoch
 
 @dag(
   schedule=None,
@@ -14,9 +13,6 @@ def assignment_main():
 
   BASE_URL = "https://opensky-network.org/api"
 
-  def to_seconds_since_epoch(input_date: str) -> int:
-    return int(mktime(date.fromisoformat(input_date).timetuple()))
-
   @task
   def read_data() -> str:
     params = {
@@ -24,18 +20,14 @@ def assignment_main():
         "begin": to_seconds_since_epoch("2022-12-01"),
         "end": to_seconds_since_epoch("2022-12-02")
     }
-    cdg_flights = f"{BASE_URL}/flights/departure"
-    response = requests.get(cdg_flights, params=params)
-    flights = json.dumps(response.json())
+    flights = json.dumps(read_from_api(f"{BASE_URL}/flights/departure", params))
     print(flights)
     return flights
 
   @task
   def write_data(flights: str) -> None:
     # write the flights into a json file
-    data = json.loads(flights)
-    with open("./dags/flights_main.json", "w") as f:
-      json.dump(data, f)
+    json_dump_to_file(json.loads(flights), "./dags/flights_main.json")
 
   flights = read_data()
   write_data(flights)
